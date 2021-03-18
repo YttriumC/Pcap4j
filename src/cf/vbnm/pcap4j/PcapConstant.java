@@ -1,6 +1,6 @@
 package cf.vbnm.pcap4j;
 
-public final class Constant {
+public final class PcapConstant {
 	/**
 	 * 状态指示:
 	 * 初始:

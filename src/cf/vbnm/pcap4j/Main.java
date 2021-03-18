@@ -1,20 +1,10 @@
 package cf.vbnm.pcap4j;
 
 import cf.vbnm.pcap4j.exceptions.*;
-import org.junit.Test;
 
 public class Main {
 	public static void main(String[] args) {
-		AbstractWinPcap winPcap = new AbstractWinPcap() {
-			@Override
-			public void captureLoopCallback(byte[] pkt, int len, int tv_Sec, int tv_uSec) {
-				System.out.printf("%02X:%02X:%02X:%02X:%02X:%02X->" +
-								"%02X:%02X:%02X:%02X:%02X:%02X len=%d,caplen=%d\n",
-						pkt[0], pkt[1], pkt[2], pkt[3], pkt[4], pkt[5],
-						pkt[6], pkt[7], pkt[8], pkt[9], pkt[10], pkt[11],
-						len, pkt.length);
-			}
-		};
+		AbstractWinPcap winPcap = new AbstractWinPcap();
 		try {
 			winPcap.findDevices();
 		} catch (FindDevicesException e) {
@@ -25,28 +15,30 @@ public class Main {
 			System.out.println(i + ":" + devs[i]);
 		}
 		try {
-			winPcap.openDevice(2, 13234, Constant.PCAP_OPENFLAG_PROMISCUOUS, 500);
+			winPcap.openDevice(2, 13234, PcapConstant.PCAP_OPENFLAG_PROMISCUOUS, 500);
 		} catch (ArgumentsException | FindDevicesException | PcapClosedException | OpenDeviceException e) {
 			e.printStackTrace();
 		}
 		try {
-			winPcap.loopCapture(0);
+			winPcap.loopCapture(0, (cap_pkt, len, tv_Sec, tv_uSec) -> {
+//				System.out.printf("%02X:%02X:%02X:%02X:%02X:%02X->" +
+//								"%02X:%02X:%02X:%02X:%02X:%02X len=%d,caplen=%d\n",
+//						cap_pkt[0], cap_pkt[1], cap_pkt[2], cap_pkt[3], cap_pkt[4], cap_pkt[5],
+//						cap_pkt[6], cap_pkt[7], cap_pkt[8], cap_pkt[9], cap_pkt[10], cap_pkt[11],
+//						len, cap_pkt.length);
+				if (cap_pkt.length!=len)
+					System.err.println("Incomplete packet\n-----------------------\nIncomplete packet");
+			});
 		} catch (OpenDeviceException | PcapClosedException e) {
 			e.printStackTrace();
 		}
 		try {
-			Thread.sleep(15000);
+			Thread.sleep(15000000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		winPcap.close();
 	}
-
-	@Test
-	public void test() throws Exception {
-
-	}
-
 
 }
 
